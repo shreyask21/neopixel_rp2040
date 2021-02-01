@@ -136,10 +136,10 @@ class neopixel:
         """
         self.__brightnessOffset = BRIGHTNESS
         if(COLOR == None):
-            COLOR = int(G << 16 | R << 8 | B)
+            COLOR = int(R << 16 | G << 8 | B)
 
-        red = int(((COLOR >> 8) & 0xFF) * BRIGHTNESS)
-        green = int(((COLOR >> 16) & 0xFF) * BRIGHTNESS)
+        green = int(((COLOR >> 8) & 0xFF) * BRIGHTNESS)
+        red = int(((COLOR >> 16) & 0xFF) * BRIGHTNESS)
         blue = int((COLOR & 0xFF) * BRIGHTNESS)
 
         RGB_SAMPLE = ((green << 16) + (red << 8) + blue)
@@ -227,3 +227,4 @@ class neopixel:
                 self.set(LED_NUMBER=j, COLOR=self.COLORS[i])
                 time.sleep_ms(500)
             self.reset()
+
