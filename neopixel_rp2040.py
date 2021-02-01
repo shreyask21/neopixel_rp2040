@@ -85,7 +85,7 @@ class neopixel:
         label("do_zero")
         nop() .side(0)[T2 - 1]
 
-    def __init__(self, LEDS=1, PIN=22):
+    def __init__(self, LEDS: int = 1, PIN: int = 22):
         """
         Parameters
         ----------
@@ -108,7 +108,7 @@ class neopixel:
             "I", [0 for _ in range(self.__numLED)])
         self.reset()
 
-    def set(self, LED_NUMBER=None, START_LED=None, STOP_LED=None, R=0xFF, G=0xFF, B=0xFF, COLOR=None, BRIGHTNESS=1):
+    def set(self, LED_NUMBER: int = None, START_LED: int = None, STOP_LED: int = None, R: int = 0xFF, G: int = 0xFF, B: int = 0xFF, COLOR: int = None, BRIGHTNESS: float = 1):
         """ Sets color for single, multiple or all LEDs
 
         If no argument is passed, all connected LED will be turned on with white color by default.
@@ -135,30 +135,28 @@ class neopixel:
             If both R,G,B and COLOR parameters are provided, the COLOR parameter is assumed to be dominant.
         """
         self.__brightnessOffset = BRIGHTNESS
+        if(COLOR == None):
+            COLOR = int(G << 16 | R << 8 | B)
+
+        red = int(((COLOR >> 8) & 0xFF) * BRIGHTNESS)
+        green = int(((COLOR >> 16) & 0xFF) * BRIGHTNESS)
+        blue = int((COLOR & 0xFF) * BRIGHTNESS)
+
+        RGB_SAMPLE = ((green << 16) + (red << 8) + blue)
+
         if(START_LED == None and STOP_LED == None):
             if(LED_NUMBER == None):
-                if(COLOR == None):
-                    for LED_NUMBER in range(self.__numLED):
-                        self.__bitstreamArray[LED_NUMBER] = int(self.__brightnessOffset * R) << 8 | int(self.__brightnessOffset*G) << 16 | int(self.__brightnessOffset*B)
-                else:
-                    for LED_NUMBER in range(self.__numLED):
-                        self.__bitstreamArray[LED_NUMBER] = (int(self.__brightnessOffset*(COLOR & 0xFF0000)) >> 8) | (int(self.__brightnessOffset*(COLOR & 0xFF00)) << 8) | (int(self.__brightnessOffset*(COLOR & 0xFF)))
-                        print(hex((int(self.__brightnessOffset*(COLOR & 0xFF0000)) >> 8) | (int(self.__brightnessOffset*(COLOR & 0xFF00)) << 8) | (int(self.__brightnessOffset*(COLOR & 0xFF)))))
+                for LED_NUMBER in range(self.__numLED):
+                    self.__bitstreamArray[LED_NUMBER] = RGB_SAMPLE
             else:
-                if(COLOR == None):
-                    self.__bitstreamArray[LED_NUMBER] = int(self.__brightnessOffset * R) << 8 | int(self.__brightnessOffset*G) << 16 | int(self.__brightnessOffset*B)
-                else:
-                    self.__bitstreamArray[LED_NUMBER] = (int(self.__brightnessOffset*(COLOR & 0xFF0000)) >> 8) | (int(self.__brightnessOffset*(COLOR & 0xFF00)) << 8) | (int(self.__brightnessOffset*(COLOR & 0xFF)))
+                self.__bitstreamArray[LED_NUMBER] = RGB_SAMPLE
         else:
             for i in range(START_LED, STOP_LED+1):
-                if(COLOR == None):
-                    self.__bitstreamArray[i] = int(self.__brightnessOffset * R) << 8 | int(self.__brightnessOffset*G) << 16 | int(self.__brightnessOffset*B)
-                else:
-                    self.__bitstreamArray[i] = (int(self.__brightnessOffset*(COLOR & 0xFF0000)) >> 8) | (int(self.__brightnessOffset*(COLOR & 0xFF00)) << 8) | (int(self.__brightnessOffset*(COLOR & 0xFF)))
+                self.__bitstreamArray[i] = RGB_SAMPLE
 
         self.__stateMachine.put(self.__bitstreamArray, 8)
 
-    def reset(self, LED_NUMBER=None, START_LED=None, STOP_LED=None):
+    def reset(self, LED_NUMBER: int = None, START_LED: int = None, STOP_LED: int = None):
         """ Resets single, multiple or all LEDs
 
         If no argument is passed, all connected LED will be reset (Turned off).
@@ -182,9 +180,9 @@ class neopixel:
         else:
             for i in range(START_LED, STOP_LED+1):
                 self.__bitstreamArray[i] = int(0)
-                
-    #TODO: RGB-> HSL conversion for brightness manipulation
-    def setBrightness(self, LED_NUMBER=None, BRIGHTNESS=0.5,  START_LED=None, STOP_LED=None):
+
+    # TODO: RGB-> HSL conversion for brightness manipulation
+    def setBrightness(self, LED_NUMBER: int = None, BRIGHTNESS: int = 0.5,  START_LED: int = None, STOP_LED: int = None):
         """ Changes brightness of single, multiple or all LEDs
 
         If no argument is passed, all connected LED will modified.
@@ -229,4 +227,3 @@ class neopixel:
                 self.set(LED_NUMBER=j, COLOR=self.COLORS[i])
                 time.sleep_ms(500)
             self.reset()
-
